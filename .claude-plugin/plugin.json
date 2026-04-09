@@ -7,5 +7,6 @@
     "email": "shubham.lohar2799@gmail.com"
   },
   "commands": "./.claude/commands/",
-  "skills": "./.claude/skills/"
+  "skills": "./.claude/skills/",
+  "hooks": []
 }
