@@ -34,9 +34,30 @@ async def talk(
     speed = speed or conf.get("tts_speed", cfg.TTS_SPEED)
     voice = voice or conf.get("tts_voice", cfg.TTS_VOICE)
 
-    # Auto-start servers if not running
-    tts_ok, _ = await check_tts_health()
+    # Auto-start servers if not running, restart TTS if engine changed
+    tts_ok, tts_info = await check_tts_health()
     stt_ok, _ = await check_stt_health()
+
+    # Check if TTS engine matches config — restart if mismatched
+    if tts_ok and cfg.SERVER_MODE == "local":
+        try:
+            import json as _json
+            health = _json.loads(tts_info)
+            running_engine = health.get("engine", "")
+            if running_engine != cfg.TTS_ENGINE:
+                from vocli.tools.service import _stop_server, _start_server
+                import asyncio
+                await _stop_server("tts")
+                await asyncio.sleep(1)
+                await _start_server("tts")
+                # Wait for new server
+                for _ in range(12):
+                    await asyncio.sleep(5)
+                    tts_ok, _ = await check_tts_health()
+                    if tts_ok:
+                        break
+        except (ValueError, KeyError):
+            pass
     if not tts_ok or not stt_ok:
         if cfg.SERVER_MODE == "remote":
             unreachable = []
