@@ -23,9 +23,9 @@ CHANNELS = 1
 
 # VAD
 VAD_AGGRESSIVENESS = int(os.environ.get("VOCLI_VAD_AGGRESSIVENESS", "2"))
-SILENCE_THRESHOLD_MS = int(os.environ.get("VOCLI_SILENCE_THRESHOLD_MS", "800"))
+SILENCE_THRESHOLD_MS = int(os.environ.get("VOCLI_SILENCE_THRESHOLD_MS", "500"))
 MAX_RECORDING_DURATION = float(os.environ.get("VOCLI_MAX_RECORDING", "30.0"))
-MIN_RECORDING_DURATION = float(os.environ.get("VOCLI_MIN_RECORDING", "1.0"))
+MIN_RECORDING_DURATION = float(os.environ.get("VOCLI_MIN_RECORDING", "0.5"))
 
 # TTS defaults
 TTS_SPEED = float(os.environ.get("VOCLI_TTS_SPEED", "0.9"))
