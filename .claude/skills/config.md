@@ -13,7 +13,7 @@ cat ~/.vocli/config.json 2>/dev/null || echo "NOT_CONFIGURED"
 **If first time (NOT_CONFIGURED):** Ask these questions one at a time, waiting for each answer:
 
 1. **"What should I be called?"** — Assistant name (e.g., "Jarvis", "Nova", "Friday")
-2. **"What should I call you?"** — User's name (e.g., "Shubham", "Boss")
+2. **"What should I call you?"** — User's name (e.g., "Boss", "Chief")
 3. **"Auto-approve voice tools?"** — Recommend yes. No permission prompts during voice. (yes/no)
 4. **"Enable task completion chime?"** — Sound when Claude finishes a task. (yes/no)
 
@@ -36,8 +36,8 @@ print('Saved')
 ```
 
 If auto-approve enabled, add these to `~/.claude/settings.json` under `permissions.allow`:
-- `mcp__vocli__talk`
-- `mcp__vocli__status`
-- `mcp__vocli__service`
+- `mcp__plugin_vocli_vocli__talk`
+- `mcp__plugin_vocli_vocli__status`
+- `mcp__plugin_vocli_vocli__service`
 
 Confirm setup and suggest `/vocli:talk`. Servers start automatically — no manual step needed.
