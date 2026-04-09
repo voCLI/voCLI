@@ -117,26 +117,15 @@ Your Mac/Linux (local)              Remote VM
 
 ### Setup
 
-**Step 1 — On your local machine** (with mic/speakers):
+Install the plugin on your remote VM, then run the remote setup wizard:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/shubham-lohar/vocli/main/scripts/serve.sh | bash
-```
-
-This installs dependencies, downloads models, and starts the STT/TTS servers. It prints the URLs when ready.
-
-**Step 2 — On the remote VM** (where Claude Code runs):
-
-```bash
-# Install the plugin (if not already)
 /plugin marketplace add shubham-lohar/vocli
 /plugin install vocli@vocli
-
-# Run remote setup
 /vocli:remote-install
 ```
 
-Paste the URLs from Step 1 when prompted. Done!
+The wizard will guide you through everything — starting the servers on your local machine, entering the URLs, and configuring your preferences.
 
 > **Tip:** If your VM can't reach your local machine directly, use SSH port forwarding:
 > ```bash
