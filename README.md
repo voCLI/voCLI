@@ -1,10 +1,10 @@
 <p align="center">
   <h1 align="center">VOCLI</h1>
   <p align="center">
-    <strong>Local voice layer for AI coding tools</strong>
+    <strong>Local voice layer for Claude Code</strong>
   </p>
   <p align="center">
-    Talk to Claude Code with your voice. 100% local, 100% private.
+    Talk to Claude Code with your voice.
   </p>
   <p align="center">
     <a href="#-quick-start"><img src="https://img.shields.io/badge/Get_Started-blue?style=for-the-badge" alt="Get Started"></a>
@@ -88,7 +88,7 @@ The `/vocli:install` wizard handles everything:
 | 5 | Lets you choose model size (`tiny` for speed, `small` for accuracy) |
 | 6 | Asks for your name, assistant name, and preferences |
 
-**Performance note:** On Apple Silicon (M1/M2/M3), VOCLI automatically uses `float16` for faster speech recognition. On Intel, it uses `int8`.
+**Performance note:** On Apple Silicon, VOCLI automatically uses `float16` for faster speech recognition. On Intel, it uses `int8`.
 
 ---
 
@@ -160,9 +160,8 @@ VOCLI runs as an MCP server with three tools:
 |-------------|---------|
 | Python | 3.10 or higher |
 | OS | macOS (Apple Silicon or Intel) or Linux |
-| ffmpeg | `brew install ffmpeg` (macOS) or `sudo apt install ffmpeg` (Linux) |
 | Disk space | ~700MB for models |
-| Audio | Microphone + speakers (local mode only) |
+| Audio | Microphone + speakers |
 
 ---
 
