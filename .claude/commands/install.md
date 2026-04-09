@@ -68,6 +68,7 @@ Ask the user:
 
 Save to `~/.vocli/config.json` including `whisper_model`, `whisper_compute_type`, and `python_path` (the path from Step 1). If auto-approve enabled, add to `~/.claude/settings.json` permissions.allow:
 - `mcp__plugin_vocli_vocli__talk`
+- `mcp__plugin_vocli_vocli__status`
 
 After each step, report success or troubleshoot errors.
 
