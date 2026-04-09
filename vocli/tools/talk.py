@@ -38,6 +38,14 @@ async def talk(
     tts_ok, _ = await check_tts_health()
     stt_ok, _ = await check_stt_health()
     if not tts_ok or not stt_ok:
+        if cfg.SERVER_MODE == "remote":
+            unreachable = []
+            if not tts_ok:
+                unreachable.append(f"TTS at {cfg.TTS_URL}")
+            if not stt_ok:
+                unreachable.append(f"STT at {cfg.STT_URL}")
+            return "Remote servers unreachable:\n" + "\n".join(f"  - {u}" for u in unreachable) + "\n\nCheck that serve.sh is running on your local machine."
+
         from vocli.tools.service import _start_server
         if not tts_ok:
             await _start_server("tts")
@@ -53,7 +61,6 @@ async def talk(
                 break
 
         if not tts_ok or not stt_ok:
-            # Check logs for clues
             errors = []
             if not tts_ok:
                 log_hint = _check_server_log("tts")
@@ -80,7 +87,12 @@ async def talk(
     try:
         audio_bytes = await record_audio()
     except Exception as e:
-        return f"Recording error: {e}. Check microphone access in System Settings > Privacy & Security > Microphone."
+        import sys as _sys
+        if _sys.platform == "darwin":
+            hint = "Check microphone access in System Settings > Privacy & Security > Microphone."
+        else:
+            hint = "Check that your microphone is connected and accessible (run: arecord -l to list devices)."
+        return f"Recording error: {e}. {hint}"
 
     # 4. Transcribe
     try:

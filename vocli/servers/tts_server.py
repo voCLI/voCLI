@@ -3,11 +3,13 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 ENGINE = os.environ.get("TTS_ENGINE", "piper")
 PORT = int(os.environ.get("TTS_PORT", "8880"))
+BIND_HOST = os.environ.get("VOCLI_BIND_HOST", "127.0.0.1")
 SAY_VOICE = os.environ.get("SAY_VOICE", "Reed (English (US))")
 PIPER_MODEL = os.environ.get(
     "PIPER_MODEL",
@@ -84,8 +86,11 @@ class TTSHandler(BaseHTTPRequestHandler):
 
             if ENGINE == "piper":
                 data = synth_piper(text, voice, speed)
-            else:
+            elif ENGINE == "say" and sys.platform == "darwin":
                 data = synth_say(text, voice)
+            else:
+                self._respond(500, {"error": f"Engine '{ENGINE}' not available on this platform. Use piper."})
+                return
 
             if data:
                 self.send_response(200)
@@ -120,9 +125,12 @@ class TTSHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"[vocli-tts] Starting on port {PORT}, engine={ENGINE}")
+    if ENGINE == "say" and sys.platform != "darwin":
+        print("[vocli-tts] WARNING: 'say' engine only works on macOS. Falling back to piper.")
+        ENGINE = "piper"
+    print(f"[vocli-tts] Starting on {BIND_HOST}:{PORT}, engine={ENGINE}")
     if ENGINE == "piper":
         print(f"[vocli-tts] Model: {PIPER_MODEL}")
-    server = HTTPServer(("127.0.0.1", PORT), TTSHandler)
-    print(f"[vocli-tts] Ready at http://127.0.0.1:{PORT}")
+    server = HTTPServer((BIND_HOST, PORT), TTSHandler)
+    print(f"[vocli-tts] Ready at http://{BIND_HOST}:{PORT}")
     server.serve_forever()

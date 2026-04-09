@@ -7,8 +7,10 @@ import tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = int(os.environ.get("WHISPER_PORT", "2022"))
+BIND_HOST = os.environ.get("VOCLI_BIND_HOST", "127.0.0.1")
 MODEL = os.environ.get("WHISPER_MODEL", "small")
 LANGUAGE = os.environ.get("WHISPER_LANGUAGE", "en")
+COMPUTE_TYPE = os.environ.get("VOCLI_WHISPER_COMPUTE_TYPE", "int8")
 
 _model = None
 
@@ -17,8 +19,8 @@ def get_model():
     global _model
     if _model is None:
         from faster_whisper import WhisperModel
-        print(f"[vocli-stt] Loading model '{MODEL}'...")
-        _model = WhisperModel(MODEL, compute_type="int8")
+        print(f"[vocli-stt] Loading model '{MODEL}' (compute_type={COMPUTE_TYPE})...")
+        _model = WhisperModel(MODEL, compute_type=COMPUTE_TYPE)
         print(f"[vocli-stt] Model loaded.")
     return _model
 
@@ -121,8 +123,8 @@ class STTHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"[vocli-stt] Starting on port {PORT}, model={MODEL}, lang={LANGUAGE}")
+    print(f"[vocli-stt] Starting on {BIND_HOST}:{PORT}, model={MODEL}, compute={COMPUTE_TYPE}")
     get_model()
-    server = HTTPServer(("127.0.0.1", PORT), STTHandler)
-    print(f"[vocli-stt] Ready at http://127.0.0.1:{PORT}")
+    server = HTTPServer((BIND_HOST, PORT), STTHandler)
+    print(f"[vocli-stt] Ready at http://{BIND_HOST}:{PORT}")
     server.serve_forever()

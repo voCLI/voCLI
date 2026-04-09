@@ -20,7 +20,11 @@ def check_ffmpeg() -> tuple[bool, str]:
     path = shutil.which("ffmpeg")
     if path:
         return True, f"ffmpeg found at {path}"
-    return False, "ffmpeg not found. Install with: brew install ffmpeg"
+    if sys.platform == "darwin":
+        hint = "Install with: brew install ffmpeg"
+    else:
+        hint = "Install with: sudo apt install ffmpeg (or your distro's package manager)"
+    return False, f"ffmpeg not found. {hint}"
 
 
 def check_piper() -> tuple[bool, str]:

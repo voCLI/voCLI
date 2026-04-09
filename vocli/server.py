@@ -9,9 +9,10 @@ from fastmcp import FastMCP
 mcp = FastMCP("vocli")
 
 # Ensure Homebrew paths are available on macOS
-for p in ["/opt/homebrew/bin", "/usr/local/bin"]:
-    if p not in os.environ.get("PATH", ""):
-        os.environ["PATH"] = p + ":" + os.environ.get("PATH", "")
+if sys.platform == "darwin":
+    for p in ["/opt/homebrew/bin", "/usr/local/bin"]:
+        if p not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = p + ":" + os.environ.get("PATH", "")
 
 # Import tools to register them with the MCP server
 import vocli.tools  # noqa: F401, E402

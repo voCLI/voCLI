@@ -1,7 +1,9 @@
 """Service tool — manage STT/TTS server processes."""
 
 import asyncio
+import os
 import shutil
+import signal
 import subprocess
 import sys
 from typing import Literal
@@ -55,10 +57,22 @@ async def service(
     return "\n".join(results)
 
 
+async def _server_healthy(server_type: str) -> bool:
+    """Check if a server is responding via HTTP health check."""
+    from vocli.clients import check_stt_health, check_tts_health
+    if server_type == "stt":
+        ok, _ = await check_stt_health()
+    else:
+        ok, _ = await check_tts_health()
+    return ok
+
+
 async def _start_server(server_type: str) -> str:
     """Start a server process in the background."""
     from vocli import config as cfg
-    import importlib.resources
+
+    if cfg.SERVER_MODE == "remote":
+        return f"{server_type.upper()}: remote mode — servers managed externally"
 
     if server_type == "stt":
         port = cfg.STT_PORT
@@ -67,6 +81,7 @@ async def _start_server(server_type: str) -> str:
             "WHISPER_PORT": str(port),
             "WHISPER_MODEL": cfg.WHISPER_MODEL,
             "WHISPER_LANGUAGE": cfg.WHISPER_LANGUAGE,
+            "VOCLI_WHISPER_COMPUTE_TYPE": cfg.WHISPER_COMPUTE_TYPE,
         }
     else:
         port = cfg.TTS_PORT
@@ -80,17 +95,14 @@ async def _start_server(server_type: str) -> str:
     if not script:
         return f"{server_type.upper()}: server script not found"
 
-    # Check if already running
-    if await _port_in_use(port):
+    if await _server_healthy(server_type):
         return f"{server_type.upper()}: already running on port {port}"
 
-    env = {**__import__("os").environ, **env_vars}
+    env = {**os.environ, **env_vars}
     log_dir = cfg.VOCLI_DIR / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / f"{server_type}.log"
 
-    # Use python3 from PATH (where deps are installed), not sys.executable
-    # (which may be the MCP server's Python without the right packages)
     python = shutil.which("python3") or sys.executable
 
     with open(log_file, "a") as log:
@@ -101,9 +113,8 @@ async def _start_server(server_type: str) -> str:
             stderr=log,
         )
 
-    # Wait briefly for startup
     await asyncio.sleep(2)
-    if await _port_in_use(port):
+    if await _server_healthy(server_type):
         return f"{server_type.upper()}: started on port {port}"
     else:
         return f"{server_type.upper()}: failed to start. Check {log_file}"
@@ -112,23 +123,35 @@ async def _start_server(server_type: str) -> str:
 async def _stop_server(server_type: str) -> str:
     """Stop a server process by finding it on its port."""
     from vocli import config as cfg
-    import signal
+
+    if cfg.SERVER_MODE == "remote":
+        return f"{server_type.upper()}: remote mode — manage servers on your local machine"
 
     port = cfg.STT_PORT if server_type == "stt" else cfg.TTS_PORT
 
     try:
-        result = await asyncio.to_thread(
-            subprocess.run,
-            ["lsof", "-ti", f":{port}"],
-            capture_output=True, text=True,
-        )
-        pids = result.stdout.strip().split("\n")
-        pids = [p for p in pids if p]
+        if sys.platform == "darwin":
+            result = await asyncio.to_thread(
+                subprocess.run,
+                ["lsof", "-ti", f":{port}"],
+                capture_output=True, text=True,
+            )
+            pids = [p for p in result.stdout.strip().split("\n") if p]
+        else:
+            result = await asyncio.to_thread(
+                subprocess.run,
+                ["fuser", f"{port}/tcp"],
+                capture_output=True, text=True,
+            )
+            pids = result.stdout.strip().split()
+
         if not pids:
             return f"{server_type.upper()}: not running"
         for pid in pids:
-            __import__("os").kill(int(pid), signal.SIGTERM)
+            os.kill(int(pid), signal.SIGTERM)
         return f"{server_type.upper()}: stopped (pid {', '.join(pids)})"
+    except FileNotFoundError:
+        return f"{server_type.upper()}: could not find process (lsof/fuser not available)"
     except Exception as e:
         return f"{server_type.upper()}: error stopping — {e}"
 
@@ -138,15 +161,3 @@ def _get_server_script(name: str):
     from pathlib import Path
     script = Path(__file__).parent.parent / "servers" / f"{name}.py"
     return script if script.exists() else None
-
-
-async def _port_in_use(port: int) -> bool:
-    """Check if a port is in use."""
-    import socket
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect(("127.0.0.1", port))
-            return True
-    except (ConnectionRefusedError, OSError):
-        return False

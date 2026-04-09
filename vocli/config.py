@@ -2,6 +2,7 @@
 
 import json
 import os
+import platform
 from pathlib import Path
 
 # Base directory
@@ -35,6 +36,20 @@ TTS_ENGINE = os.environ.get("VOCLI_TTS_ENGINE", "piper")
 WHISPER_MODEL = os.environ.get("VOCLI_WHISPER_MODEL", "small")
 WHISPER_LANGUAGE = os.environ.get("VOCLI_WHISPER_LANGUAGE", "en")
 
+
+def detect_compute_type() -> str:
+    """Auto-detect optimal whisper compute_type based on CPU architecture."""
+    machine = platform.machine().lower()
+    if machine in ("arm64", "aarch64"):
+        return "float16"
+    return "int8"
+
+
+WHISPER_COMPUTE_TYPE = os.environ.get("VOCLI_WHISPER_COMPUTE_TYPE", detect_compute_type())
+
+# Server mode: "local" (default) or "remote"
+SERVER_MODE = "local"
+
 # Piper model path
 PIPER_MODEL = os.environ.get(
     "VOCLI_PIPER_MODEL",
@@ -66,3 +81,21 @@ def update_config(**kwargs) -> dict:
     config.update(kwargs)
     save_config(config)
     return config
+
+
+def load_runtime_config() -> None:
+    """Patch module globals from config.json. Env vars take precedence."""
+    global STT_URL, TTS_URL, SERVER_MODE, WHISPER_MODEL, WHISPER_COMPUTE_TYPE
+    c = get_config()
+    SERVER_MODE = c.get("server_mode", "local")
+    if "VOCLI_STT_URL" not in os.environ and "stt_url" in c:
+        STT_URL = c["stt_url"]
+    if "VOCLI_TTS_URL" not in os.environ and "tts_url" in c:
+        TTS_URL = c["tts_url"]
+    if "VOCLI_WHISPER_MODEL" not in os.environ and "whisper_model" in c:
+        WHISPER_MODEL = c["whisper_model"]
+    if "VOCLI_WHISPER_COMPUTE_TYPE" not in os.environ and "whisper_compute_type" in c:
+        WHISPER_COMPUTE_TYPE = c["whisper_compute_type"]
+
+
+load_runtime_config()
