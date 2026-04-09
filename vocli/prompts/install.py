@@ -59,6 +59,8 @@ Installation done! Now proceed directly to configuration — ask the user:
 Save to `~/.vocli/config.json` and add vocli tools to `~/.claude/settings.json` permissions.allow if auto-approve is enabled:
 - `mcp__plugin_vocli_vocli__talk`
 
-STT and TTS servers start automatically when they use `/vocli:talk` — no manual step needed.
+After each step, report success or any errors. If something fails, help troubleshoot before continuing.
 
-After each step, report success or any errors. If something fails, help troubleshoot before continuing."""
+## IMPORTANT: When everything is done, say EXACTLY this and NOTHING else:
+"Setup complete! Default voice: **Northern English Male (medium)**. Run `/vocli:talk` to start a voice conversation!"
+Do NOT summarize settings, do NOT list STT/TTS details, do NOT say "you're all set". Just the message above."""
