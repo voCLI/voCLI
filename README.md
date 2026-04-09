@@ -119,13 +119,9 @@ Your Mac/Linux (local)              Remote VM
 
 Install the plugin on your remote VM, then run the remote setup wizard:
 
-```bash
-/plugin marketplace add shubham-lohar/vocli
-/plugin install vocli@vocli
-/vocli:remote-install
-```
+The `/vocli:remote-install` wizard handles everything:
 
-The wizard will guide you through everything — starting the servers on your local machine, entering the URLs, and configuring your preferences.
+From starting the servers on your local machine, entering the URLs, and configuring your preferences.
 
 > **Tip:** If your VM can't reach your local machine directly, use SSH port forwarding:
 > ```bash
