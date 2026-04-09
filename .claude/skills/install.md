@@ -51,8 +51,6 @@ Installation done! Ask the user:
 
 Save to `~/.vocli/config.json`. If auto-approve enabled, add to `~/.claude/settings.json` permissions.allow:
 - `mcp__plugin_vocli_vocli__talk`
-- `mcp__plugin_vocli_vocli__status`
-- `mcp__plugin_vocli_vocli__service`
 
 After each step, report success or troubleshoot errors.
 

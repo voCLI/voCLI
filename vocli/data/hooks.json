@@ -1,17 +1,9 @@
 {
-  "description": "VOCLI PreToolUse hooks for auto-allowing voice tools",
+  "description": "VOCLI PreToolUse hooks for auto-allowing voice talk tool",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "mcp__vocli__talk",
-        "hooks": [{"type": "command", "command": "echo allow"}]
-      },
-      {
-        "matcher": "mcp__vocli__status",
-        "hooks": [{"type": "command", "command": "echo allow"}]
-      },
-      {
-        "matcher": "mcp__vocli__service",
         "hooks": [{"type": "command", "command": "echo allow"}]
       }
     ]
