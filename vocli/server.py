@@ -13,9 +13,8 @@ for p in ["/opt/homebrew/bin", "/usr/local/bin"]:
     if p not in os.environ.get("PATH", ""):
         os.environ["PATH"] = p + ":" + os.environ.get("PATH", "")
 
-# Import tools and prompts to register them with the MCP server
+# Import tools to register them with the MCP server
 import vocli.tools  # noqa: F401, E402
-import vocli.prompts  # noqa: F401, E402
 
 
 def main():
