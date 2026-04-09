@@ -15,7 +15,7 @@ MAX_BODY_BYTES = 64 * 1024  # 64KB max request body
 SAY_VOICE = os.environ.get("SAY_VOICE", "Reed (English (US))")
 PIPER_MODEL = os.environ.get(
     "PIPER_MODEL",
-    os.path.expanduser("~/.vocli/models/piper/en_GB-northern_english_male-medium.onnx"),
+    os.path.expanduser("~/.vocli/models/piper/en_US-ryan-high.onnx"),
 )
 
 SAY_VOICE_MAP = {

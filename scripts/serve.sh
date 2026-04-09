@@ -62,12 +62,12 @@ echo "[OK] Python packages installed"
 mkdir -p "$VOCLI_DIR/models/piper" "$VOCLI_DIR/models/whisper" "$VOCLI_DIR/logs"
 
 # --- Step 5: Download Piper model ---
-PIPER_MODEL="$VOCLI_DIR/models/piper/en_GB-northern_english_male-medium.onnx"
+PIPER_MODEL="$VOCLI_DIR/models/piper/en_US-ryan-high.onnx"
 PIPER_CONFIG="$PIPER_MODEL.json"
 if [ ! -f "$PIPER_MODEL" ]; then
     echo "[...] Downloading Piper voice model..."
-    curl -sL -o "$PIPER_MODEL" "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx"
-    curl -sL -o "$PIPER_CONFIG" "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx.json"
+    curl -sL -o "$PIPER_MODEL" "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx"
+    curl -sL -o "$PIPER_CONFIG" "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
     echo "[OK] Piper model downloaded"
 else
     echo "[OK] Piper model found"

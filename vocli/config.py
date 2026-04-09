@@ -53,7 +53,7 @@ SERVER_MODE = "local"
 # Piper model path
 PIPER_MODEL = os.environ.get(
     "VOCLI_PIPER_MODEL",
-    str(VOCLI_DIR / "models" / "piper" / "en_GB-northern_english_male-medium.onnx"),
+    str(VOCLI_DIR / "models" / "piper" / "en_US-ryan-high.onnx"),
 )
 
 # Config file

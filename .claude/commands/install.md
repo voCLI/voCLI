@@ -34,8 +34,8 @@ Default to `small` if the user doesn't have a preference.
 
 ## Step 7: Download Piper voice model
 ```bash
-curl -L -o ~/.vocli/models/piper/en_GB-northern_english_male-medium.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx"
-curl -L -o ~/.vocli/models/piper/en_GB-northern_english_male-medium.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx.json"
+curl -L -o ~/.vocli/models/piper/en_US-ryan-high.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx"
+curl -L -o ~/.vocli/models/piper/en_US-ryan-high.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
 ```
 
 ## Step 8: Download Whisper model
@@ -65,5 +65,5 @@ Save to `~/.vocli/config.json` including `whisper_model` and `whisper_compute_ty
 After each step, report success or troubleshoot errors.
 
 ## IMPORTANT: When everything is done, say EXACTLY this and NOTHING else:
-"Setup complete! Default voice: **Northern English Male (medium)**. Run `/vocli:talk` to start a voice conversation!"
+"Setup complete! Default voice: **Ryan (high quality, US English)**. Run `/vocli:talk` to start a voice conversation!"
 Do NOT summarize settings, do NOT list STT/TTS details, do NOT say "you're all set". Just the message above.
