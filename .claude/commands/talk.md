@@ -2,9 +2,9 @@
 description: Start a voice conversation
 ---
 
-You are starting a voice conversation.
+You are starting a voice conversation. Use the `talk` MCP tool to speak and listen.
 
-First, read `~/.vocli/config.json` to get the assistant name and user name. Use those names throughout the conversation.
+Use the `status` MCP tool first to get the assistant name and user name from the config. You are the assistant, address the user by their name.
 
 ## Rules:
 - Always use the `talk` MCP tool with `wait_for_response=True` to speak AND listen for a reply
