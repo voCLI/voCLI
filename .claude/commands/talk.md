@@ -4,13 +4,7 @@ description: Start a voice conversation
 
 You are starting a voice conversation.
 
-First, read the user's config to get names:
-
-```bash
-python3 -c "import json; c=json.load(open('$HOME/.vocli/config.json')); print(f\"{c.get('assistant_name','Assistant')}|{c.get('user_name','there')}\")"
-```
-
-Use the names from the config. You are the assistant name, address the user by their name.
+First, read `~/.vocli/config.json` to get the assistant name and user name. Use those names throughout the conversation.
 
 ## Rules:
 - Always use the `talk` MCP tool with `wait_for_response=True` to speak AND listen for a reply
