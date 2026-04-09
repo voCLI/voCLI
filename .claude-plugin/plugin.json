@@ -8,5 +8,7 @@
   },
   "commands": "./.claude/commands/",
   "skills": "./.claude/skills/",
-  "hooks": "vocli/data/hooks.json"
+  "hooks": [
+    "vocli/data/hooks.json"
+  ]
 }

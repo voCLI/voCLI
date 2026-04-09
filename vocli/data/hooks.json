@@ -1,4 +1,5 @@
 {
+  "description": "VOCLI PreToolUse hooks for auto-allowing voice tools",
   "hooks": {
     "PreToolUse": [
       {
