@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="600" height="600" alt="vocli-logo" src="https://github.com/user-attachments/assets/44a2b97e-426d-4ab6-81ae-e34e9c64ac45" alt="voCLI (voice + CLI)">
+  <img width="600" height="500" alt="vocli-logo" src="https://github.com/user-attachments/assets/d1b0a22b-e74c-4a1d-8606-5fa46c1945e7" alt="voCLI (voice + CLI)"> 
   <p align="center">
     Talk to Claude Code with your voice.
   </p>
