@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="voCLI (voice + CLI)" width="200">
+  <img width="600" height="600" alt="vocli-logo" src="https://github.com/user-attachments/assets/44a2b97e-426d-4ab6-81ae-e34e9c64ac45" alt="voCLI (voice + CLI)">
   <p align="center">
     Talk to Claude Code with your voice.
   </p>
@@ -9,6 +9,7 @@
     <a href="https://github.com/shubham-lohar/vocli/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"></a>
   </p>
 </p>
+
 
 ---
 
