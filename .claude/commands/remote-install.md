@@ -69,7 +69,6 @@ print('Saved')
 If auto-approve enabled, add to `~/.claude/settings.json` permissions.allow:
 - `mcp__plugin_vocli_vocli__talk`
 - `mcp__plugin_vocli_vocli__status`
-- `mcp__plugin_vocli_vocli__service`
 
 ## IMPORTANT: When done, say EXACTLY:
 "Remote setup complete! Run `/vocli:talk` to start a voice conversation."

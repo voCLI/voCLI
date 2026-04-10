@@ -64,6 +64,5 @@ print('Saved')
 If auto-approve enabled, add these to `~/.claude/settings.json` under `permissions.allow`:
 - `mcp__plugin_vocli_vocli__talk`
 - `mcp__plugin_vocli_vocli__status`
-- `mcp__plugin_vocli_vocli__service`
 
 Confirm setup and suggest `/vocli:talk`. Servers start automatically — no manual step needed.
