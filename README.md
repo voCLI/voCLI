@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">voCLI</h1><strong>voice + CLI</strong>
+  <h1 align="center">voCLI (voice + CLI)</h1>
   <p align="center">
     Talk to Claude Code with your voice.
   </p>
