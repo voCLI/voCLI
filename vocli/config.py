@@ -28,8 +28,8 @@ MAX_RECORDING_DURATION = float(os.environ.get("VOCLI_MAX_RECORDING", "60.0"))
 MIN_RECORDING_DURATION = float(os.environ.get("VOCLI_MIN_RECORDING", "0.5"))
 
 # TTS defaults
-TTS_SPEED = float(os.environ.get("VOCLI_TTS_SPEED", "0.9"))
-TTS_VOICE = os.environ.get("VOCLI_TTS_VOICE", "am_echo")
+TTS_SPEED = float(os.environ.get("VOCLI_TTS_SPEED", "1.0"))
+TTS_VOICE = os.environ.get("VOCLI_TTS_VOICE", "af_sarah")
 TTS_ENGINE = os.environ.get("VOCLI_TTS_ENGINE", "kokoro")
 
 # STT defaults
