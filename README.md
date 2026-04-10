@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">voCLI (voice + CLI)</h1>
+  <img src="assets/logo.svg" alt="voCLI (voice + CLI)" width="200">
   <p align="center">
     Talk to Claude Code with your voice.
   </p>
