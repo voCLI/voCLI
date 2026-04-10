@@ -1,8 +1,8 @@
 <p align="center">
-  <h1 align="center">VOCLI</h1>
-  <!-- <p align="center">
-    <strong>Local voice layer for Claude Code</strong>
-  </p> -->
+  <h1 align="center">voCLI</h1>
+  <p align="center">
+    <strong>voice + CLI</strong>
+  </p>
   <p align="center">
     Talk to Claude Code with your voice.
   </p>
@@ -15,11 +15,11 @@
 
 ---
 
-## What is VOCLI?
+## What is voCLI?
 
 > You speak. Claude listens. Claude responds. You hear it.
 
-VOCLI adds a **voice layer** to Claude Code. Everything runs locally on your machine — no audio is sent to the cloud, ever.
+voCLI adds a **voice layer** to Claude Code. Everything runs locally on your machine — no audio is sent to the cloud, ever.
 
 ```
 You speak --> Mic --> faster-whisper (STT) --> Text to Claude
@@ -40,7 +40,7 @@ Claude responds --> Kokoro TTS --> Audio plays through speakers
 
 ### Recommended: Claude Code Plugin Marketplace
 
-The easiest way to install VOCLI:
+The easiest way to install voCLI:
 
 ```bash
 # Step 1: Add the marketplace
@@ -64,7 +64,7 @@ The easiest way to install VOCLI:
 # Install UV package manager (if needed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Add VOCLI as an MCP server
+# Add voCLI as an MCP server
 claude mcp add --scope user vocli -- uvx --refresh vocli
 
 # Restart Claude Code, then run:
@@ -75,7 +75,7 @@ claude mcp add --scope user vocli -- uvx --refresh vocli
 
 ## Local Install
 
-For running Claude Code and VOCLI on the **same machine** (Mac or Linux with mic/speakers).
+For running Claude Code and voCLI on the **same machine** (Mac or Linux with mic/speakers).
 
 The `/vocli:install` wizard handles everything:
 
@@ -88,7 +88,7 @@ The `/vocli:install` wizard handles everything:
 | 5 | Lets you choose model size (`tiny` for speed, `small` for accuracy) |
 | 6 | Asks for your name, assistant name, and preferences |
 
-**Performance note:** On Apple Silicon, VOCLI automatically uses `float16` for faster speech recognition. On Intel, it uses `int8`.
+**Performance note:** On Apple Silicon, voCLI automatically uses `float16` for faster speech recognition. On Intel, it uses `int8`.
 
 ---
 
@@ -98,7 +98,7 @@ For running Claude Code on a **remote VM** while keeping voice on your local mac
 
 ### Why?
 
-Remote VMs have no microphone or speakers. VOCLI's remote mode runs the audio servers on your local machine and connects them to Claude Code on the VM via the network.
+Remote VMs have no microphone or speakers. voCLI's remote mode runs the audio servers on your local machine and connects them to Claude Code on the VM via the network.
 
 ### How it works
 
@@ -106,7 +106,7 @@ Remote VMs have no microphone or speakers. VOCLI's remote mode runs the audio se
 Your Mac/Linux (local)              Remote VM
 +------------------+               +------------------+
 |  STT Server      | <-- network   |  Claude Code     |
-|  (port 2022)     | ----------->  |  + VOCLI Plugin  |
+|  (port 2022)     | ----------->  |  + voCLI Plugin  |
 |                  |               |                  |
 |  TTS Server      | <-- network   |  /vocli:talk     |
 |  (port 8880)     | ----------->  |  just works!     |
@@ -144,7 +144,7 @@ From starting the servers on your local machine, entering the URLs, and configur
 
 ## MCP Tools
 
-VOCLI runs as an MCP server with three tools:
+voCLI runs as an MCP server with three tools:
 
 | Tool | What it does |
 |------|-------------|
