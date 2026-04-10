@@ -30,6 +30,9 @@ async def talk(
     from vocli.clients import synthesize, transcribe, check_stt_health, check_tts_health
     from vocli.audio import play_audio, record_audio, play_chime
 
+    # Re-read config in case user changed settings
+    cfg.load_runtime_config()
+
     # Check if config exists
     conf = cfg.get_config()
     if not conf.get("assistant_name"):
@@ -126,6 +129,9 @@ async def talk(
         text = await transcribe(audio_bytes)
     except Exception as e:
         return f"STT error: {e}"
+
+    if not text or not text.strip():
+        return "[no speech detected]"
 
     # 5. Wait phrase detection — pause and re-listen instead of returning
     if _is_wait_phrase(text):
