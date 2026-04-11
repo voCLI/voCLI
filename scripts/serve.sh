@@ -54,8 +54,8 @@ fi
 echo "[OK] ffmpeg found"
 
 # --- Step 3: Install Python packages ---
-echo "[...] Installing faster-whisper and kokoro-onnx..."
-python3 -m pip install -q faster-whisper kokoro-onnx soundfile 2>/dev/null
+echo "[...] Installing dependencies..."
+python3 -m pip install -q faster-whisper kokoro-onnx soundfile sounddevice numpy webrtcvad-wheels 2>/dev/null
 echo "[OK] Python packages installed"
 
 # --- Step 4: Create directories ---

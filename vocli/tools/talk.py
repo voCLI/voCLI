@@ -27,8 +27,7 @@ async def talk(
         Otherwise: confirmation that the message was spoken.
     """
     from vocli import config as cfg
-    from vocli.clients import synthesize, transcribe, check_stt_health, check_tts_health
-    from vocli.audio import play_audio, record_audio, play_chime
+    from vocli.clients import check_stt_health, check_tts_health
 
     # Re-read config in case user changed settings
     cfg.load_runtime_config()
@@ -97,6 +96,70 @@ async def talk(
             if not stt_ok:
                 errors.append(f"STT server failed to start. {_check_server_log('stt')}")
             return "Servers could not start.\n" + "\n".join(errors) + "\n\nRun /vocli:install to fix, or ask Claude to help troubleshoot."
+
+    if cfg.SERVER_MODE == "remote":
+        return await _talk_remote(message, wait_for_response, voice, speed, conf, cfg)
+    else:
+        return await _talk_local(message, wait_for_response, voice, speed, conf)
+
+
+async def _talk_remote(message, wait_for_response, voice, speed, conf, cfg):
+    """Voice conversation via remote servers — audio stays on the remote machine."""
+    import httpx
+
+    # 1. Speak: send text to TTS server which plays it locally on the remote machine
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                f"{cfg.TTS_URL}/v1/audio/speak",
+                json={"input": message, "voice": voice, "speed": speed},
+            )
+            resp.raise_for_status()
+    except Exception as e:
+        return f"TTS error: {e}"
+
+    if not wait_for_response:
+        return f"Spoke: {message}"
+
+    # 2. Listen: TTS server records from mic and transcribes via STT
+    try:
+        async with httpx.AsyncClient(timeout=90) as client:
+            resp = await client.post(
+                f"{cfg.TTS_URL}/v1/audio/listen",
+                json={"stt_port": cfg.STT_PORT},
+            )
+            resp.raise_for_status()
+            result = resp.json()
+            text = result.get("text", "")
+    except Exception as e:
+        return f"Listen error: {e}"
+
+    if not text or not text.strip():
+        return "[no speech detected]"
+
+    if _is_wait_phrase(text):
+        import asyncio
+        wait_duration = conf.get("wait_duration", 30)
+        await asyncio.sleep(wait_duration)
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                resp = await client.post(
+                    f"{cfg.TTS_URL}/v1/audio/listen",
+                    json={"stt_port": cfg.STT_PORT},
+                )
+                resp.raise_for_status()
+                result = resp.json()
+                text = result.get("text", "")
+        except Exception as e:
+            return f"Error after wait: {e}"
+
+    return text
+
+
+async def _talk_local(message, wait_for_response, voice, speed, conf):
+    """Voice conversation with local audio — mic and speakers on this machine."""
+    from vocli.clients import synthesize, transcribe
+    from vocli.audio import play_audio, record_audio, play_chime
 
     # 1. Synthesize and play the message
     try:

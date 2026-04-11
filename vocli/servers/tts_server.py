@@ -117,9 +117,188 @@ def synth_kokoro(text, voice, speed=1.0):
     return buf.getvalue()
 
 
+def play_wav(wav_bytes):
+    """Play WAV audio through the local speakers."""
+    import numpy as np
+    import sounddevice as sd
+    import wave
+
+    buf = io.BytesIO(wav_bytes)
+    with wave.open(buf, "rb") as wf:
+        sample_rate = wf.getframerate()
+        frames = wf.readframes(wf.getnframes())
+        dtype = np.int16 if wf.getsampwidth() == 2 else np.int32
+        data = np.frombuffer(frames, dtype=dtype).astype(np.float32)
+        if dtype == np.int16:
+            data /= 32768.0
+        elif dtype == np.int32:
+            data /= 2147483648.0
+    sd.play(data, samplerate=sample_rate)
+    sd.wait()
+
+
+def record_and_transcribe(stt_port):
+    """Record from mic and send to STT server for transcription."""
+    import numpy as np
+    import sounddevice as sd
+    import wave
+    import urllib.request
+
+    sample_rate = 16000
+    frame_duration_ms = 30
+    frame_samples = int(sample_rate * frame_duration_ms / 1000)
+    max_duration = 60.0
+    silence_threshold_ms = 800
+    min_duration = 0.5
+
+    # Play chime
+    t = np.linspace(0, 0.15, int(sample_rate * 0.15), endpoint=False)
+    chime = np.sin(2 * np.pi * 880 * t).astype(np.float32)
+    fade = int(sample_rate * 0.02)
+    chime[:fade] *= np.linspace(0, 1, fade)
+    chime[-fade:] *= np.linspace(1, 0, fade)
+    chime *= 0.3
+    sd.play(chime, samplerate=sample_rate)
+    sd.wait()
+
+    # Record with VAD
+    frames = []
+    silent_ms = 0
+    speech_detected = False
+    import time
+    start_time = time.time()
+
+    def callback(indata, frame_count, time_info, status):
+        frames.append(indata.copy())
+
+    try:
+        import webrtcvad
+        vad = webrtcvad.Vad(2)
+    except ImportError:
+        vad = None
+
+    with sd.InputStream(samplerate=sample_rate, channels=1, dtype="int16",
+                        blocksize=frame_samples, callback=callback):
+        while (time.time() - start_time) < max_duration:
+            time.sleep(frame_duration_ms / 1000)
+            if not vad or len(frames) == 0:
+                continue
+            raw = frames[-1].tobytes()
+            chunk = raw[:frame_samples * 2]
+            if len(chunk) < frame_samples * 2:
+                continue
+            if vad.is_speech(chunk, sample_rate):
+                speech_detected = True
+                silent_ms = 0
+            else:
+                silent_ms += frame_duration_ms
+            if speech_detected and silent_ms >= silence_threshold_ms:
+                break
+            if (time.time() - start_time) < min_duration:
+                continue
+
+    if not frames:
+        return ""
+
+    audio_data = np.concatenate(frames, axis=0)
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(audio_data.tobytes())
+    wav_bytes = buf.getvalue()
+
+    # Send to STT server
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{stt_port}/v1/audio/transcriptions",
+        method="POST",
+    )
+    import uuid
+    boundary = uuid.uuid4().hex
+    body = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file"; filename="audio.wav"\r\n'
+        f"Content-Type: audio/wav\r\n\r\n"
+    ).encode() + wav_bytes + (
+        f"\r\n--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="model"\r\n\r\nwhisper-1\r\n'
+        f"--{boundary}--\r\n"
+    ).encode()
+    req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+    req.data = body
+    resp = urllib.request.urlopen(req, timeout=30)
+    result = json.loads(resp.read())
+    return result.get("text", "")
+
+
 class TTSHandler(BaseHTTPRequestHandler):
     def do_POST(self):
-        if self.path in ("/v1/audio/speech", "/audio/speech"):
+        if self.path == "/v1/audio/speak":
+            # Synthesize AND play locally — for remote mode
+            length = int(self.headers.get("Content-Length", 0))
+            if length > MAX_BODY_BYTES:
+                self._respond(413, {"error": f"Request too large"})
+                return
+            try:
+                body = json.loads(self.rfile.read(length)) if length else {}
+            except (json.JSONDecodeError, ValueError):
+                self._respond(400, {"error": "Invalid JSON"})
+                return
+
+            text = body.get("input", "")
+            if not text.strip():
+                self._respond(400, {"error": "Input text is required"})
+                return
+            if len(text) > MAX_TEXT_LENGTH:
+                self._respond(400, {"error": f"Text too long"})
+                return
+            voice = body.get("voice", "alloy")
+            try:
+                speed = float(body.get("speed", 1.0))
+            except (ValueError, TypeError):
+                speed = 1.0
+            if speed <= 0 or speed > 5.0:
+                speed = 1.0
+
+            try:
+                if ENGINE == "kokoro":
+                    data = synth_kokoro(text, voice, speed)
+                elif ENGINE == "piper":
+                    data = synth_piper(text, voice, speed)
+                elif ENGINE == "say" and sys.platform == "darwin":
+                    data = synth_say(text, voice)
+                else:
+                    self._respond(500, {"error": f"Engine not available"})
+                    return
+            except Exception as e:
+                self._respond(500, {"error": f"TTS error: {e}"})
+                return
+
+            if data:
+                try:
+                    play_wav(data)
+                    self._respond(200, {"status": "played"})
+                except Exception as e:
+                    self._respond(500, {"error": f"Playback error: {e}"})
+            else:
+                self._respond(500, {"error": "TTS synthesis failed"})
+
+        elif self.path == "/v1/audio/listen":
+            # Record from mic + transcribe via STT — for remote mode
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length)) if length else {}
+            except (json.JSONDecodeError, ValueError):
+                body = {}
+            stt_port = body.get("stt_port", 2022)
+            try:
+                text = record_and_transcribe(stt_port)
+                self._respond(200, {"text": text})
+            except Exception as e:
+                self._respond(500, {"error": f"Listen error: {e}"})
+
+        elif self.path in ("/v1/audio/speech", "/audio/speech"):
             length = int(self.headers.get("Content-Length", 0))
             if length > MAX_BODY_BYTES:
                 self._respond(413, {"error": f"Request too large (max {MAX_BODY_BYTES // 1024}KB)"})
