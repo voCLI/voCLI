@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" height="300" alt="vocli-logo" src="https://github.com/user-attachments/assets/d1b0a22b-e74c-4a1d-8606-5fa46c1945e7" alt="voCLI (voice + CLI)"> 
+  <img width="400" height="400" alt="vocli-logo" src="https://github.com/user-attachments/assets/f1b6956a-2128-4b9a-af86-4e360c3f3717" alt="voCLI (voice + CLI)"> 
   <p align="center">
     Don't just type to your AI coding tool. Talk to it.
   </p>
