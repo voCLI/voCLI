@@ -1,5 +1,6 @@
+<!-- ![voCLI final logo](https://github.com/user-attachments/assets/02affe9c-4da1-449b-9895-103335632da7) -->
 <p align="center">
-  <img width="400" height="400" alt="vocli-logo" src="https://github.com/user-attachments/assets/f1b6956a-2128-4b9a-af86-4e360c3f3717" alt="voCLI (voice + CLI)"> 
+  <img width="400" height="400" alt="vocli-logo" src="https://github.com/user-attachments/assets/02affe9c-4da1-449b-9895-103335632da7" alt="voCLI (voice + CLI)"> 
   <p align="center">
     Don't just type to your AI coding tool. Talk to it.
   </p>
