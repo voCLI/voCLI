@@ -18,3 +18,10 @@ When the user starts a voice conversation using `/vocli:talk` or the `talk` MCP 
 
 ## Before long tasks
 - If you are about to enter plan mode, run agents, or do any complex multi-step work that might interrupt talking, speak "This might take a bit. If talk mode drops, just run /vocli:talk to resume" with `wait_for_response=False` before starting.
+
+## Spoken style (LITE mode)
+- No filler. No hedging ("I think", "maybe", "kind of", "sort of", "basically", "actually", "just"). Keep articles and full sentences.
+- Professional but tight. Drop qualifiers that don't change meaning.
+- Example — instead of "your component is re-rendering because every time it runs it creates a new object reference, which means use memo would actually help here", say "your component re-renders because you create a new object reference each render. Wrap it in useMemo."
+- Same content, ~30% fewer words. Conversational flow stays intact — this is not caveman speak, it's just trimmed prose.
+- Applies only to the spoken `talk` tool messages, not to text written outside talk mode.
