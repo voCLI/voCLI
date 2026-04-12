@@ -65,7 +65,7 @@ The easiest way to install voCLI:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Add voCLI as an MCP server
-claude mcp add --scope user vocli -- uvx --refresh vocli
+claude mcp add --scope user vocli -- uvx --refresh vocli serve
 
 # Restart Claude Code, then run:
 /vocli:install

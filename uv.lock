@@ -1842,10 +1842,10 @@ dependencies = [
 requires-dist = [
     { name = "click", specifier = ">=8.0" },
     { name = "fastmcp", specifier = ">=2.3.2,<3" },
-    { name = "httpx" },
-    { name = "numpy" },
-    { name = "scipy" },
-    { name = "sounddevice" },
+    { name = "httpx", specifier = ">=0.24" },
+    { name = "numpy", specifier = ">=1.21" },
+    { name = "scipy", specifier = ">=1.9.0" },
+    { name = "sounddevice", specifier = ">=0.4.6" },
     { name = "webrtcvad-wheels", specifier = ">=2.0.14" },
 ]
 
