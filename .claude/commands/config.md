@@ -7,51 +7,22 @@ First, check if VOCLI is already configured:
 cat ~/.vocli/config.json 2>/dev/null || echo "NOT_CONFIGURED"
 ```
 
-**If already configured:** Show current settings and ask what the user wants to change. Only update the specific setting they request — don't re-run the full setup. Users can switch TTS engine by setting `tts_engine` to `kokoro` (natural, high quality) or `piper` (fast, lightweight).
-
-### When user switches TTS engine:
-**If switching to `piper`:** Check if piper is installed and model exists:
-```bash
-which piper && ls ~/.vocli/models/piper/en_US-ryan-high.onnx 2>/dev/null && echo "PIPER_READY" || echo "PIPER_MISSING"
-```
-If `PIPER_MISSING`, install it:
-```bash
-python3 -m pip install piper-tts
-mkdir -p ~/.vocli/models/piper
-curl -L -o ~/.vocli/models/piper/en_US-ryan-high.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx"
-curl -L -o ~/.vocli/models/piper/en_US-ryan-high.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
-```
-
-**If switching to `kokoro`:** Check if kokoro-onnx is installed and model exists:
-```bash
-python3 -c "import kokoro_onnx" 2>/dev/null && ls ~/.vocli/models/kokoro/kokoro-v1.0.onnx 2>/dev/null && echo "KOKORO_READY" || echo "KOKORO_MISSING"
-```
-If `KOKORO_MISSING`, install it:
-```bash
-python3 -m pip install kokoro-onnx soundfile
-mkdir -p ~/.vocli/models/kokoro
-curl -L -o ~/.vocli/models/kokoro/kokoro-v1.0.onnx "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
-curl -L -o ~/.vocli/models/kokoro/voices-v1.0.bin "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
-```
-
-After installing, save `tts_engine` to config.json and restart the TTS server.
+**If already configured:** Show current settings and ask what the user wants to change. Only update the specific setting they request — don't re-run the full setup.
 
 ### When user wants to change voice:
-**Kokoro engine (default):** Show available voices and let them pick:
+Show available Kokoro voices and let them pick:
 
 - **American Female:** af_alloy, af_aoede, af_bella, af_heart, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah (default), af_sky
 - **American Male:** am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck
 - **British Female:** bf_alice, bf_emma, bf_isabella, bf_lily
 - **British Male:** bm_daniel, bm_fable, bm_george, bm_lewis
 
-Save the chosen voice as `tts_voice` in config.json. The change takes effect on the next `talk` call — no restart needed.
-
-**Piper engine:** Only one voice is installed (Ryan). To use a different Piper voice, the user would need to download a different model from https://rhasspy.github.io/piper-samples/.
+Save the chosen voice as `voice` in config.json. The change takes effect on the next `talk` call — no restart needed.
 
 ### When user wants to change audio devices:
 List available devices by running:
 ```bash
-python3 -c "
+~/.vocli/venv/bin/python -c "
 import sounddevice as sd
 for i, d in enumerate(sd.query_devices()):
     io = []
@@ -60,6 +31,8 @@ for i, d in enumerate(sd.query_devices()):
     print(f'  [{i}] {d[\"name\"]} ({\", \".join(io)})')
 "
 ```
+If `~/.vocli/venv/bin/python` doesn't exist (user hasn't run `/vocli:install` yet), fall back to system `python3`.
+
 Show the list and let the user pick an input device (mic) and output device (speakers/headphones).
 Save as `input_device` and `output_device` in config.json. Use the device name (not index). Set to `"default"` to use system default.
 

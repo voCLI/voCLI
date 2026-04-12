@@ -18,7 +18,7 @@ Run `ffmpeg -version`. If missing: `brew install ffmpeg` (macOS) or `sudo apt in
 
 ## Step 3: Create VOCLI directories
 ```bash
-mkdir -p ~/.vocli/models/kokoro ~/.vocli/models/piper ~/.vocli/models/whisper ~/.vocli/logs
+mkdir -p ~/.vocli/models/kokoro ~/.vocli/models/whisper ~/.vocli/logs
 ```
 
 ## Step 4: Create the isolated STT/TTS venv
@@ -82,9 +82,9 @@ After each step, report success or troubleshoot errors.
 ## IMPORTANT: When everything is done, say EXACTLY ONE of these and NOTHING else:
 
 **If `uv` was freshly installed in Step 1**, say:
-"Setup complete! Voice engine: **Kokoro** (high quality). I just installed `uv`, so you'll need to **restart Claude Code** once for the MCP server to pick it up. Then type **let's talk** or run `/vocli:talk` to start a voice conversation! If voice feels slow, run `/vocli:config` and switch to `piper` for faster performance."
+"Setup complete! Voice engine: **Kokoro** (high quality). I just installed `uv`, so you'll need to **restart Claude Code** once for the MCP server to pick it up. Then type **let's talk** or run `/vocli:talk` to start a voice conversation!"
 
 **Otherwise** (uv was already installed), say:
-"Setup complete! Voice engine: **Kokoro** (high quality). Just type **let's talk** or run `/vocli:talk` to start a voice conversation! If voice feels slow, run `/vocli:config` and switch to `piper` for faster performance."
+"Setup complete! Voice engine: **Kokoro** (high quality). Just type **let's talk** or run `/vocli:talk` to start a voice conversation!"
 
 Do NOT summarize settings, do NOT list STT/TTS details, do NOT say "you're all set". Just one of the messages above.

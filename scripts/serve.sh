@@ -2,7 +2,7 @@
 set -e
 
 # VOCLI Standalone Server — run on your local machine with mic/speakers.
-# Starts STT (Whisper) and TTS (Piper) servers for remote Claude Code usage.
+# Starts STT (Whisper) and TTS (Kokoro) servers for remote Claude Code usage.
 
 STT_PORT="${VOCLI_STT_PORT:-2022}"
 TTS_PORT="${VOCLI_TTS_PORT:-8880}"
@@ -121,8 +121,7 @@ WHISPER_PORT="$STT_PORT" WHISPER_MODEL="$WHISPER_MODEL" \
     python3 "$STT_SCRIPT" >> "$VOCLI_DIR/logs/stt.log" 2>&1 &
 STT_PID=$!
 
-TTS_ENGINE="${VOCLI_TTS_ENGINE:-kokoro}"
-TTS_PORT="$TTS_PORT" TTS_ENGINE="$TTS_ENGINE" KOKORO_MODEL="$KOKORO_MODEL" KOKORO_VOICES="$KOKORO_VOICES" \
+TTS_PORT="$TTS_PORT" KOKORO_MODEL="$KOKORO_MODEL" KOKORO_VOICES="$KOKORO_VOICES" \
     python3 "$TTS_SCRIPT" >> "$VOCLI_DIR/logs/tts.log" 2>&1 &
 TTS_PID=$!
 

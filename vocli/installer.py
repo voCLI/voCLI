@@ -1,7 +1,6 @@
 """VOCLI installer — check and install dependencies."""
 
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -27,22 +26,6 @@ def check_ffmpeg() -> tuple[bool, str]:
     return False, f"ffmpeg not found. {hint}"
 
 
-def check_piper() -> tuple[bool, str]:
-    """Check if piper-tts is installed."""
-    path = shutil.which("piper")
-    if path:
-        return True, f"piper found at {path}"
-    return False, "piper not found. Install with: pip install piper-tts"
-
-
-def check_piper_model() -> tuple[bool, str]:
-    """Check if the default Piper model exists."""
-    model_path = Path(cfg.PIPER_MODEL)
-    if model_path.exists():
-        return True, f"Model at {model_path}"
-    return False, f"Model not found at {model_path}"
-
-
 def check_whisper() -> tuple[bool, str]:
     """Check if faster-whisper is importable."""
     try:
@@ -55,7 +38,7 @@ def check_whisper() -> tuple[bool, str]:
 def create_directories() -> tuple[bool, str]:
     """Create ~/.vocli directory structure."""
     dirs = [
-        cfg.VOCLI_DIR / "models" / "piper",
+        cfg.VOCLI_DIR / "models" / "kokoro",
         cfg.VOCLI_DIR / "models" / "whisper",
         cfg.VOCLI_DIR / "logs",
     ]
@@ -69,8 +52,6 @@ def run_all_checks() -> list[tuple[str, bool, str]]:
     checks = [
         ("Python version", *check_python_version()),
         ("ffmpeg", *check_ffmpeg()),
-        ("piper-tts", *check_piper()),
-        ("Piper model", *check_piper_model()),
         ("faster-whisper", *check_whisper()),
         ("Directories", *create_directories()),
     ]

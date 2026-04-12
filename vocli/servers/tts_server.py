@@ -1,23 +1,15 @@
-"""OpenAI-compatible TTS server with switchable engines: kokoro, piper, or say."""
+"""OpenAI-compatible TTS server using Kokoro."""
 
 import io
 import json
 import os
-import subprocess
 import sys
-import tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-ENGINE = os.environ.get("TTS_ENGINE", "kokoro")
 PORT = int(os.environ.get("TTS_PORT", "8880"))
 BIND_HOST = os.environ.get("VOCLI_BIND_HOST", "127.0.0.1")
 MAX_TEXT_LENGTH = 5000  # Max characters for TTS input
 MAX_BODY_BYTES = 64 * 1024  # 64KB max request body
-SAY_VOICE = os.environ.get("SAY_VOICE", "Reed (English (US))")
-PIPER_MODEL = os.environ.get(
-    "PIPER_MODEL",
-    os.path.expanduser("~/.vocli/models/piper/en_US-ryan-high.onnx"),
-)
 KOKORO_MODEL = os.environ.get(
     "KOKORO_MODEL",
     os.path.expanduser("~/.vocli/models/kokoro/kokoro-v1.0.onnx"),
@@ -28,64 +20,6 @@ KOKORO_VOICES = os.environ.get(
 )
 
 _kokoro = None
-
-SAY_VOICE_MAP = {
-    "alloy": "Samantha",
-    "nova": "Karen",
-    "echo": "Daniel",
-    "fable": "Daniel",
-    "onyx": "Fred",
-    "shimmer": "Shelley (English (US))",
-}
-
-
-def synth_say(text, voice):
-    """Generate audio using macOS say."""
-    mac_voice = SAY_VOICE_MAP.get(voice, SAY_VOICE)
-    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as f:
-        aiff_path = f.name
-    wav_path = aiff_path.replace(".aiff", ".wav")
-    try:
-        subprocess.run(
-            ["say", "-v", mac_voice, "-o", aiff_path, text],
-            check=True, timeout=30,
-        )
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", aiff_path, wav_path],
-            check=True, timeout=30,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
-        with open(wav_path, "rb") as f:
-            return f.read()
-    finally:
-        for p in [aiff_path, wav_path]:
-            try:
-                os.unlink(p)
-            except OSError:
-                pass
-
-
-def synth_piper(text, voice, speed=1.0):
-    """Generate audio using Piper TTS."""
-    length_scale = 1.0 / speed if speed > 0 else 1.0
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        wav_path = f.name
-    try:
-        proc = subprocess.run(
-            ["piper", "--model", PIPER_MODEL, "--output_file", wav_path,
-             "--length_scale", str(length_scale)],
-            input=text, capture_output=True, text=True, timeout=30,
-        )
-        if proc.returncode != 0:
-            print(f"[vocli-tts] Piper error: {proc.stderr}")
-            return None
-        with open(wav_path, "rb") as f:
-            return f.read()
-    finally:
-        try:
-            os.unlink(wav_path)
-        except OSError:
-            pass
 
 
 def get_kokoro():
@@ -104,7 +38,6 @@ def synth_kokoro(text, voice, speed=1.0):
     import numpy as np
     kokoro = get_kokoro()
     samples, sample_rate = kokoro.create(text, voice=voice, speed=speed, lang="en-us")
-    # Clamp to [-1, 1] to prevent clipping noise, then convert to 16-bit PCM WAV
     samples = np.clip(samples, -1.0, 1.0)
     buf = io.BytesIO()
     import wave
@@ -151,7 +84,6 @@ def record_and_transcribe(stt_port):
     silence_threshold_ms = 800
     min_duration = 0.5
 
-    # Play chime
     t = np.linspace(0, 0.15, int(sample_rate * 0.15), endpoint=False)
     chime = np.sin(2 * np.pi * 880 * t).astype(np.float32)
     fade = int(sample_rate * 0.02)
@@ -161,7 +93,6 @@ def record_and_transcribe(stt_port):
     sd.play(chime, samplerate=sample_rate)
     sd.wait()
 
-    # Record with VAD
     frames = []
     silent_ms = 0
     speech_detected = False
@@ -209,7 +140,6 @@ def record_and_transcribe(stt_port):
         wf.writeframes(audio_data.tobytes())
     wav_bytes = buf.getvalue()
 
-    # Send to STT server
     req = urllib.request.Request(
         f"http://127.0.0.1:{stt_port}/v1/audio/transcriptions",
         method="POST",
@@ -235,7 +165,6 @@ def record_and_transcribe(stt_port):
 class TTSHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/v1/audio/speak":
-            # Synthesize AND play locally — for remote mode
             length = int(self.headers.get("Content-Length", 0))
             if length > MAX_BODY_BYTES:
                 self._respond(413, {"error": f"Request too large"})
@@ -253,7 +182,7 @@ class TTSHandler(BaseHTTPRequestHandler):
             if len(text) > MAX_TEXT_LENGTH:
                 self._respond(400, {"error": f"Text too long"})
                 return
-            voice = body.get("voice", "alloy")
+            voice = body.get("voice", "af_sarah")
             try:
                 speed = float(body.get("speed", 1.0))
             except (ValueError, TypeError):
@@ -262,15 +191,7 @@ class TTSHandler(BaseHTTPRequestHandler):
                 speed = 1.0
 
             try:
-                if ENGINE == "kokoro":
-                    data = synth_kokoro(text, voice, speed)
-                elif ENGINE == "piper":
-                    data = synth_piper(text, voice, speed)
-                elif ENGINE == "say" and sys.platform == "darwin":
-                    data = synth_say(text, voice)
-                else:
-                    self._respond(500, {"error": f"Engine not available"})
-                    return
+                data = synth_kokoro(text, voice, speed)
             except Exception as e:
                 self._respond(500, {"error": f"TTS error: {e}"})
                 return
@@ -285,7 +206,6 @@ class TTSHandler(BaseHTTPRequestHandler):
                 self._respond(500, {"error": "TTS synthesis failed"})
 
         elif self.path == "/v1/audio/listen":
-            # Record from mic + transcribe via STT — for remote mode
             length = int(self.headers.get("Content-Length", 0))
             try:
                 body = json.loads(self.rfile.read(length)) if length else {}
@@ -318,7 +238,7 @@ class TTSHandler(BaseHTTPRequestHandler):
                 self._respond(400, {"error": f"Text too long (max {MAX_TEXT_LENGTH} chars)"})
                 return
 
-            voice = body.get("voice", "alloy")
+            voice = body.get("voice", "af_sarah")
 
             try:
                 speed = float(body.get("speed", 0.9))
@@ -330,15 +250,7 @@ class TTSHandler(BaseHTTPRequestHandler):
                 return
 
             try:
-                if ENGINE == "kokoro":
-                    data = synth_kokoro(text, voice, speed)
-                elif ENGINE == "piper":
-                    data = synth_piper(text, voice, speed)
-                elif ENGINE == "say" and sys.platform == "darwin":
-                    data = synth_say(text, voice)
-                else:
-                    self._respond(500, {"error": f"Engine '{ENGINE}' not available on this platform. Use kokoro or piper."})
-                    return
+                data = synth_kokoro(text, voice, speed)
             except Exception as e:
                 self._respond(500, {"error": f"TTS synthesis error: {e}"})
                 return
@@ -356,7 +268,7 @@ class TTSHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
-            self._respond(200, {"status": "ok", "engine": ENGINE})
+            self._respond(200, {"status": "ok", "engine": "kokoro"})
         elif self.path in ("/v1/models", "/models"):
             self._respond(200, {
                 "data": [{"id": "tts-1", "object": "model"}],
@@ -372,31 +284,19 @@ class TTSHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode())
 
     def log_message(self, fmt, *args):
-        print(f"[vocli-tts:{ENGINE}] {args[0]}")
+        print(f"[vocli-tts:kokoro] {args[0]}")
 
 
 if __name__ == "__main__":
-    if ENGINE == "say" and sys.platform != "darwin":
-        print("[vocli-tts] WARNING: 'say' engine only works on macOS. Falling back to kokoro.")
-        ENGINE = "kokoro"
-    if ENGINE == "kokoro":
-        if not os.path.isfile(KOKORO_MODEL):
-            print(f"[vocli-tts] ERROR: Kokoro model not found: {KOKORO_MODEL}")
-            sys.exit(1)
-        if not os.path.isfile(KOKORO_VOICES):
-            print(f"[vocli-tts] ERROR: Kokoro voices not found: {KOKORO_VOICES}")
-            sys.exit(1)
-        print(f"[vocli-tts] Model: {KOKORO_MODEL}")
-        get_kokoro()  # Preload model
-    elif ENGINE == "piper":
-        if not PIPER_MODEL.endswith(".onnx"):
-            print(f"[vocli-tts] ERROR: Model path must be an .onnx file, got: {PIPER_MODEL}")
-            sys.exit(1)
-        if not os.path.isfile(PIPER_MODEL):
-            print(f"[vocli-tts] ERROR: Model file not found: {PIPER_MODEL}")
-            sys.exit(1)
-        print(f"[vocli-tts] Model: {PIPER_MODEL}")
-    print(f"[vocli-tts] Starting on {BIND_HOST}:{PORT}, engine={ENGINE}")
+    if not os.path.isfile(KOKORO_MODEL):
+        print(f"[vocli-tts] ERROR: Kokoro model not found: {KOKORO_MODEL}")
+        sys.exit(1)
+    if not os.path.isfile(KOKORO_VOICES):
+        print(f"[vocli-tts] ERROR: Kokoro voices not found: {KOKORO_VOICES}")
+        sys.exit(1)
+    print(f"[vocli-tts] Model: {KOKORO_MODEL}")
+    get_kokoro()  # Preload model
+    print(f"[vocli-tts] Starting on {BIND_HOST}:{PORT}, engine=kokoro")
     server = HTTPServer((BIND_HOST, PORT), TTSHandler)
     print(f"[vocli-tts] Ready at http://{BIND_HOST}:{PORT}")
     server.serve_forever()

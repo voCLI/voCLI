@@ -47,12 +47,6 @@ WHISPER_COMPUTE_TYPE = os.environ.get("VOCLI_WHISPER_COMPUTE_TYPE", detect_compu
 # Server mode: "local" (default) or "remote"
 SERVER_MODE = "local"
 
-# Piper model path
-PIPER_MODEL = os.environ.get(
-    "VOCLI_PIPER_MODEL",
-    str(VOCLI_DIR / "models" / "piper" / "en_US-ryan-high.onnx"),
-)
-
 # Kokoro model paths
 KOKORO_MODEL = os.environ.get(
     "VOCLI_KOKORO_MODEL",
@@ -120,7 +114,7 @@ def load_runtime_config() -> None:
             WHISPER_COMPUTE_TYPE = ct
     if "VOCLI_TTS_ENGINE" not in os.environ and "tts_engine" in c:
         engine = c["tts_engine"]
-        if engine in {"kokoro", "piper", "say"}:
+        if engine == "kokoro":
             TTS_ENGINE = engine
 
 

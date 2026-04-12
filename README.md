@@ -30,7 +30,7 @@ Claude responds --> Kokoro TTS --> Audio plays through speakers
 - **Privacy-first** — all audio processing stays on your machine
 - **Works offline** — after initial model download, no internet needed
 - **Personalized** — set your name and the assistant's name
-- **Multiple TTS engines** — Kokoro (natural, high quality), Piper (fast, lightweight), or macOS Say. Switch anytime via `/vocli:config`
+- **High-quality voice** — natural-sounding Kokoro TTS with 27 voices to choose from
 - **Smart performance** — auto-detects Apple Silicon vs Intel for optimal speed
 - **Remote-ready** — use voice even when Claude Code runs on a remote VM
 
