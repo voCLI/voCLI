@@ -20,17 +20,26 @@ KOKORO_VOICES = os.environ.get(
 )
 
 _kokoro = None
+_available_voices = None
 
 
 def get_kokoro():
     """Lazy-load Kokoro model."""
-    global _kokoro
+    global _kokoro, _available_voices
     if _kokoro is None:
         from kokoro_onnx import Kokoro
+        import numpy as np
         print(f"[vocli-tts] Loading Kokoro model...")
         _kokoro = Kokoro(KOKORO_MODEL, KOKORO_VOICES)
-        print(f"[vocli-tts] Kokoro loaded.")
+        _available_voices = set(np.load(KOKORO_VOICES).files)
+        print(f"[vocli-tts] Kokoro loaded. {len(_available_voices)} voices available.")
     return _kokoro
+
+
+def get_available_voices():
+    """Return set of valid voice names."""
+    get_kokoro()  # ensure loaded
+    return _available_voices
 
 
 def synth_kokoro(text, voice, speed=1.0):
@@ -80,8 +89,8 @@ def record_and_transcribe(stt_port):
     sample_rate = 16000
     frame_duration_ms = 30
     frame_samples = int(sample_rate * frame_duration_ms / 1000)
-    max_duration = 60.0
-    silence_threshold_ms = 800
+    max_duration = 180.0
+    silence_threshold_ms = 1500
     min_duration = 0.5
 
     t = np.linspace(0, 0.15, int(sample_rate * 0.15), endpoint=False)
@@ -182,7 +191,11 @@ class TTSHandler(BaseHTTPRequestHandler):
             if len(text) > MAX_TEXT_LENGTH:
                 self._respond(400, {"error": f"Text too long"})
                 return
-            voice = body.get("voice", "af_sarah")
+            voice = body.get("voice", "af_heart")
+            voices = get_available_voices()
+            if voices and voice not in voices:
+                print(f"[vocli-tts] Voice '{voice}' not found, falling back to af_heart")
+                voice = "af_heart"
             try:
                 speed = float(body.get("speed", 1.0))
             except (ValueError, TypeError):
@@ -238,7 +251,11 @@ class TTSHandler(BaseHTTPRequestHandler):
                 self._respond(400, {"error": f"Text too long (max {MAX_TEXT_LENGTH} chars)"})
                 return
 
-            voice = body.get("voice", "af_sarah")
+            voice = body.get("voice", "af_heart")
+            voices = get_available_voices()
+            if voices and voice not in voices:
+                print(f"[vocli-tts] Voice '{voice}' not found, falling back to af_heart")
+                voice = "af_heart"
 
             try:
                 speed = float(body.get("speed", 0.9))

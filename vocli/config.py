@@ -23,13 +23,13 @@ CHANNELS = 1
 
 # VAD
 VAD_AGGRESSIVENESS = int(os.environ.get("VOCLI_VAD_AGGRESSIVENESS", "2"))
-SILENCE_THRESHOLD_MS = int(os.environ.get("VOCLI_SILENCE_THRESHOLD_MS", "800"))
-MAX_RECORDING_DURATION = float(os.environ.get("VOCLI_MAX_RECORDING", "60.0"))
+SILENCE_THRESHOLD_MS = int(os.environ.get("VOCLI_SILENCE_THRESHOLD_MS", "1500"))
+MAX_RECORDING_DURATION = float(os.environ.get("VOCLI_MAX_RECORDING", "180.0"))
 MIN_RECORDING_DURATION = float(os.environ.get("VOCLI_MIN_RECORDING", "0.5"))
 
 # TTS defaults
 TTS_SPEED = float(os.environ.get("VOCLI_TTS_SPEED", "1.0"))
-TTS_VOICE = os.environ.get("VOCLI_TTS_VOICE", "af_sarah")
+TTS_VOICE = os.environ.get("VOCLI_TTS_VOICE", "af_heart")
 TTS_ENGINE = os.environ.get("VOCLI_TTS_ENGINE", "kokoro")
 
 # STT defaults

@@ -71,7 +71,7 @@ Ask the user:
 2. "What should I call you?" (user name)
 3. "Auto-approve voice tools?" (yes/no, recommend yes)
 
-Note: The default voice is **female (Sarah)**. Tell the user: "You can change the voice anytime — run `/vocli:config` and ask to change voice. There are 54 voices to choose from (male, female, American, British, and more)."
+Note: The default voice is **af_heart** (American female). Tell the user: "You can change the voice anytime — run `/vocli:config` and ask to change voice. There are 54 voices to choose from (male, female, American, British, and more)."
 
 Save to `~/.vocli/config.json` including `whisper_model`, `whisper_compute_type`, and `python_path`. **`python_path` must be the absolute path to the venv Python**, e.g. `/Users/<name>/.vocli/venv/bin/python` — expand `~` to the real home directory when writing the config. If auto-approve enabled, add to `~/.claude/settings.json` permissions.allow:
 - `mcp__plugin_vocli_vocli__talk`

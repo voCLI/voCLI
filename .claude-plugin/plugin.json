@@ -1,6 +1,6 @@
 {
   "name": "vocli",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Local, privacy-first voice assistant for Claude Code",
   "author": {
     "name": "Shubham Lohar",

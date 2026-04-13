@@ -38,7 +38,7 @@ async def talk(
         return "VOCLI is not configured yet. Run /vocli:config to set up your assistant name and preferences."
 
     speed = speed if speed is not None else conf.get("tts_speed", cfg.TTS_SPEED)
-    voice = voice if voice is not None else conf.get("tts_voice", cfg.TTS_VOICE)
+    voice = voice if voice is not None else conf.get("voice", conf.get("tts_voice", cfg.TTS_VOICE))
 
     # Auto-start servers if not running, restart TTS if engine changed
     tts_ok, tts_info = await check_tts_health()
